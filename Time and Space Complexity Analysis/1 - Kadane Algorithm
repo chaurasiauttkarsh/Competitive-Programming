@@ -1,0 +1,14 @@
+int longest_sum(int arr[], int size)
+{
+    int best_max = 0;
+    int curr_max = 0;
+    for(int i = 0; i < size, i++)
+    {
+        curr_max += arr[i];
+        if(best_max < curr_max)
+            best_max = curr_max;
+        if(curr_max < 0)
+            curr_max = 0;
+    }
+    return best_max;
+}
