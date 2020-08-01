@@ -1,0 +1,60 @@
+Sort an array A using Merge Sort.
+Change in the input array itself. So no need to return or print anything.
+Input format :
+Line 1 : Integer n i.e. Array size
+Line 2 : Array elements (separated by space)
+Output format :
+Array elements in increasing order (separated by space)
+Constraints :
+1 <= n <= 10^3
+Sample Input 1 :
+6 
+2 6 8 5 4 3
+Sample Output 1 :
+2 3 4 5 6 8
+Sample Input 2 :
+5
+2 1 5 2 3
+Sample Output 2 :
+1 2 2 3 5 
+
+Solution:
+void merge(int *input, int si, int ei, int mid)
+{
+    int *la = new int[mid - si + 1];
+    int *ra = new int[ei - mid];
+    for(int i = 0; i < mid - si + 1; i++)
+        la[i] = input[si + i];
+    for(int i = 0; i < ei - mid; i++)
+        ra[i] = input[mid + i + 1];
+    int i1 = 0, i2 = 0;
+    while(i1 < mid - si + 1 && i2 < ei - mid)
+    {
+        if(la[i1] <= ra[i2])
+            input[si + i1 + i2] = la[i1++];
+        else
+            input[si + i1 + i2] = ra[i2++];
+    }
+    while(i1 < mid - si + 1)
+        input[si + i1 + i2] = la[i1++];
+    while(i2 < ei - mid)
+        input[si + i1 + i2] = ra[i2++];
+    delete []la;
+    delete []ra;
+}
+
+void merge_sort(int *input, int si, int ei)
+{
+    if(si < ei)
+    {
+        int mid  = (si + ei)/2;
+        merge_sort(input, si, mid);
+        merge_sort(input, mid + 1, ei);
+        merge(input, si, ei, mid);
+    }
+}
+
+void mergeSort(int input[], int size)
+{
+    merge_sort(input, 0, size - 1);
+}
