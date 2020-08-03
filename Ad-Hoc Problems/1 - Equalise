@@ -1,0 +1,63 @@
+time limit per test1 second
+memory limit per test256 megabytes
+inputstandard input
+outputstandard output
+You are given two binary strings 𝑎 and 𝑏 of the same length. You can perform the following two operations on the string 𝑎:
+
+Swap any two bits at indices 𝑖 and 𝑗 respectively (1≤𝑖,𝑗≤𝑛), the cost of this operation is |𝑖−𝑗|, that is, the absolute difference between 𝑖 and 𝑗.
+Select any arbitrary index 𝑖 (1≤𝑖≤𝑛) and flip (change 0 to 1 or 1 to 0) the bit at this index. The cost of this operation is 1.
+Find the minimum cost to make the string 𝑎 equal to 𝑏. It is not allowed to modify string 𝑏.
+
+Input
+The first line contains a single integer 𝑛 (1≤𝑛≤106) — the length of the strings 𝑎 and 𝑏.
+
+The second and third lines contain strings 𝑎 and 𝑏 respectively.
+
+Both strings 𝑎 and 𝑏 have length 𝑛 and contain only '0' and '1'.
+
+Output
+Output the minimum cost to make the string 𝑎 equal to 𝑏.
+
+Examples
+inputCopy
+3
+100
+001
+outputCopy
+2
+inputCopy
+4
+0101
+0011
+outputCopy
+1
+Note
+In the first example, one of the optimal solutions is to flip index 1 and index 3, the string 𝑎 changes in the following way: "100" → "000" → "001". The cost is 1+1=2.
+
+The other optimal solution is to swap bits and indices 1 and 3, the string 𝑎 changes then "100" → "001", the cost is also |1−3|=2.
+
+In the second example, the optimal solution is to swap bits at indices 2 and 3, the string 𝑎 changes as "0101" → "0011". The cost is |2−3|=1.
+
+Solution:
+#include <iostream>
+#include <string>
+using namespace std;
+
+int update(string a, string b)
+{
+    if(a.size() == 0)
+        return 0;
+    if(a[0] == b[0])
+        return update(a.substr(1), b.substr(1));
+    if((a[0] == b[1]) && (a[1] == b[0]) && (a[0] != a[1]))
+        return 1 + update(a.substr(2), b.substr(2));
+    return 1 + update(a.substr(1), b.substr(1));
+}
+
+int main()
+{
+    string a, b;
+    cin >> a >> b;
+    cout << update(a, b);
+}
+
