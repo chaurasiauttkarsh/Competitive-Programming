@@ -1,0 +1,73 @@
+Given a 2D array, find the maximum sum rectangle in it. In other words find maximum sum over all rectangles in the matrix.
+Input
+First line contains 2 numbers n and m denoting number of rows and number of columns. Next n lines contain m space separated integers denoting elements of matrix nxm.
+Output
+Output a single integer, maximum sum rectangle.
+Constraints
+1<=n,m<=100
+Sample Input
+4 5
+1 2 -1 -4 -20
+-8 -3 4 2 1
+3 8 10 1 3
+-4 -1 1 7 -6
+Sample Output
+29
+
+Solution:
+#include <bits/stdc++.h>
+#include <climits>
+using namespace std;
+
+int kadane(int *arr, int size)
+{
+    int curr_max = 0;
+    int max = INT_MIN;
+    for(int i = 0; i < size; i++)
+    {
+        curr_max += arr[i];
+        if(curr_max > max)
+            max = curr_max;
+        if(curr_max < 0)
+            curr_max = 0;
+    }
+    return max;
+}
+
+int main()
+{
+    int row, col;
+    cin >> row >> col;
+    
+    int rec[row][col];
+    for(int i = 0; i < row; i++)
+        for(int j = 0; j < col; j++)
+            cin >> rec[i][j];
+    
+    int max = INT_MIN;
+    int curr_max = 0;
+    for(int l = 0; l < col; l++)
+    {
+        int arr[row];
+        for(int r = l; r < col; r++)
+        {
+            if(l == r)
+            {
+                for(int i = 0; i < row; i++)
+                    arr[i] = rec[i][l];
+            }
+            else
+            {
+                for(int i = 0; i < row; i++)
+                    arr[i] += rec[i][r];
+            }
+            curr_max = kadane(arr, row);
+            if(curr_max > max)
+                max = curr_max;
+        }
+    }
+    cout << max;
+    
+    
+    return 0;
+}
