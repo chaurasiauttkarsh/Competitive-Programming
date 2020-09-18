@@ -19,19 +19,26 @@ Sample Output:
 Solution:
 #include<bits/stdc++.h>
 using namespace std;
-int main()
+int main(int argc, char **argv)
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    
     int len;
     cin >> len;
+    
     int left_sum = 0;
     int right_sum = 0;
+    
     for(int i = 0; i < len; i++)
     {
         int element;
         cin >> element;
-        if(i % 2 == 0 && element % 2 == 0)
+        
+        if(!(i & 1) && !(element & 1))
             left_sum += element;
-        else if(i % 2 != 0 && element % 2 != 0)
+        
+        else if((i & 1) && (element & 1))
             right_sum += element;
     }
     cout << left_sum << " " << right_sum;
