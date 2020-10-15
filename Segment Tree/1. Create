@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void buildtree_helper(int *arr, int i, int s, int e, int *seg_tree)
+{
+    // Base Case (s == e)
+    if(s == e)
+    {
+        seg_tree[i] = arr[s];
+        return;
+    }
+    // Finding the value of mid
+    int mid = (s + e)/2;
+    // Building the left subtree [s, mid]
+    buildtree_helper(arr, 2 * i + 1, s, mid, seg_tree);
+    // Building the right subtree [mid + 1, e]
+    buildtree_helper(arr, 2 * i + 2, mid + 1, e, seg_tree);
+    // Filling the value of current node [s, e]
+    seg_tree[i] = seg_tree[2 * i + 1] + seg_tree[2 * i + 2];
+    
+}
+
+void buildtree(int *arr, int N, int *seg_tree)
+{
+    // buildtree_helper for putting the initial values
+    buildtree_helper(arr, 0, 0, N - 1, seg_tree);
+}
+
+int main(int argc, char **argv)
+{
+    ios_base :: sync_with_stdio(false);
+    cin.tie(NULL);
+    
+    // Base structure
+    int arr[] = {1, 2, 3, 4, 5};
+    int N = sizeof(arr)/sizeof(int);
+    int *seg_tree = new int[2 * N - 1];
+    
+    buildtree(arr, N, seg_tree);
+    
+    // Printing the final result
+    for(int i = 0; i < 2 * N - 1; i++)
+        cout << seg_tree[i] << " ";
+    cout << endl;
+}
