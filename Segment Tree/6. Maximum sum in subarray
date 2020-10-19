@@ -1,0 +1,122 @@
+You are given a sequence A[1], A[2], ..., A[N] . ( |A[i]| ≤ 15007 , 1 ≤ N ≤ 50000 ). A query is defined as follows:
+Query(x,y) = Max { a[i]+a[i+1]+...+a[j] ; x ≤ i ≤ j ≤ y }.
+Given M queries, your program must output the results of these queries.
+Input
+The first line of the input file contains the integer N.
+In the second line, N numbers follow.
+The third line contains the integer M.
+M lines follow, where line i contains 2 numbers xi and yi.
+Output
+Your program should output the results of the M queries, one 
+query per line.
+Sample Input:
+3 
+-1 2 3 
+1
+1 2
+Sample Output:
+2
+
+Solution:
+#include<bits/stdc++.h>
+using namespace std;
+
+struct node
+{
+    int max_pre_sum, max_suff_sum, total_sum, max_sub_sum;
+};
+
+void build_tree_helper(int *arr, int i , int s, int e, struct node *seg_tree)
+{
+    if(s == e)
+    {
+        struct node n;
+        n.max_pre_sum = arr[s];
+        n.max_suff_sum = arr[s];
+        n.max_sub_sum = arr[s];
+        n.total_sum = arr[s];
+        seg_tree[i] = n;
+        return;
+    }
+    
+    int mid = (s + e) / 2;
+    
+    build_tree_helper(arr, 2 * i + 1, s, mid, seg_tree);
+    build_tree_helper(arr, 2 * i + 2, mid + 1, e, seg_tree);
+    
+    struct node left_ans = seg_tree[2 * i + 1];
+    struct node right_ans = seg_tree[2 * i + 2];
+    
+    struct node ans;
+    ans.max_pre_sum = max(left_ans.total_sum + right_ans.max_pre_sum, left_ans.max_pre_sum);
+    ans.max_suff_sum = max(right_ans.total_sum + left_ans.max_suff_sum, right_ans.max_suff_sum);
+    ans.max_sub_sum = max(left_ans.max_suff_sum + right_ans.max_pre_sum, max(left_ans.max_sub_sum, right_ans.max_sub_sum));
+    ans.total_sum = left_ans.total_sum + right_ans.total_sum;
+    
+    seg_tree[i] = ans;
+}
+
+void build_tree(int *arr, int N, struct node *seg_tree)
+{
+    build_tree_helper(arr, 0, 0, N - 1, seg_tree);
+}
+
+
+struct node query(int *arr, int i, int st, int et, struct node *seg_tree, int start, int end)
+{
+    if(st == start && et == end)
+        return seg_tree[i];
+    
+    int mid = (st + et) / 2;
+    if(end <= mid)
+        return query(arr, 2 * i + 1, st, mid, seg_tree, start, end);
+    if(start > mid)
+        return query(arr, 2 * i + 2, mid + 1, et, seg_tree, start, end);
+    else
+    {
+        struct node left_ans = query(arr, 2 * i + 1, st, mid, seg_tree, start, mid);
+    	struct node right_ans = query(arr, 2 * i + 2, mid + 1, et, seg_tree, mid + 1, end);
+    
+    	struct node ans;
+    	ans.max_pre_sum = max(left_ans.total_sum + right_ans.max_pre_sum, left_ans.max_pre_sum);
+    	ans.max_suff_sum = max(right_ans.total_sum + left_ans.max_suff_sum, right_ans.max_suff_sum);
+    	ans.max_sub_sum = max(left_ans.max_suff_sum + right_ans.max_pre_sum, max(left_ans.max_sub_sum, right_ans.max_sub_sum));
+    	ans.total_sum = left_ans.total_sum + right_ans.total_sum;
+    
+    	return ans;
+    }
+}
+
+struct node query(int *arr, int N, struct node *seg_tree, int start, int end)
+{
+    return query(arr, 0, 0, N - 1, seg_tree, start, end);
+}
+
+int main(int argc, char **argv) 
+{
+    ios_base :: sync_with_stdio(false);
+    cin.tie(NULL);
+    
+    int N;
+    cin >> N;
+    
+    int *arr = new int[N];
+    for(int i = 0; i < N; i++)
+        cin >> arr[i];
+    
+    struct node *seg_tree = new struct node[4 * N];
+    build_tree(arr, N, seg_tree);
+    
+    int Q;
+    cin >> Q;
+    
+    for(int i = 0; i < Q; i++)
+    {
+        int a, b;
+        cin >> a >> b;
+        cout << query(arr, N, seg_tree, a - 1, b - 1).max_sub_sum << "\n";    
+    }
+    
+    delete []arr;
+    delete []seg_tree;
+}
