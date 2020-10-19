@@ -1,0 +1,148 @@
+You are given a sequence A[1], A[2], ..., A[N], ( 0 ≤ A[i] ≤ 10^8 , 2 ≤ N ≤ 10^5 ). There are two types of operations and they are defined as follows:
+Update:
+This will be indicated in the input by a 'U' followed by space and then two integers i and x.
+U i x, 1 ≤ i ≤ N, and x, 0 ≤ x ≤ 10^8.
+This operation sets the value of A[i] to x.
+Query:
+This will be indicated in the input by a 'Q' followed by a single space and then two integers i and j.
+Q x y, 1 ≤ x < y ≤ N.
+You must find i and j such that x ≤ i, j ≤ y and i != j, such that the sum A[i]+A[j] is maximized. Print the sum A[i]+A[j].
+Input
+The first line of input consists of an integer N representing the length of the sequence. 
+Next line consists of N space separated integers A[i]. Next line contains an integer Q, Q ≤ 10^5, representing the number of operations. Next Q lines contain the operations.
+Output
+ Output the maximum sum mentioned above, in a separate line, for each Query.
+Input:
+5
+1 2 3 4 5
+6
+Q 2 4
+Q 2 5
+U 1 6
+Q 1 5
+U 1 7
+Q 1 5
+Output:
+7
+9
+11
+12
+
+Solution:
+#include <bits/stdc++.h>
+#include <utility>
+using namespace std;
+
+void build_tree_helper(int *arr, int i , int s, int e, pair<int, int> *seg_tree)
+{
+    if(s == e)
+    {
+        seg_tree[i].first = arr[s];
+        seg_tree[i].second = -1;
+        return;
+    }
+    int mid = (s + e)/2;
+    build_tree_helper(arr, 2 * i + 1, s, mid, seg_tree);
+    build_tree_helper(arr, 2 * i + 2, mid + 1, e, seg_tree);
+    int largest = max(seg_tree[2 * i + 1].first, seg_tree[2 * i + 2].first);
+    int s_largest = max(seg_tree[2 * i + 1].first + seg_tree[2 * i + 2].first - largest, max(seg_tree[2 * i + 1].second, seg_tree[2 * i + 2].second));
+    seg_tree[i].first = largest;
+    seg_tree[i].second = s_largest;
+}
+
+void build_tree(int *arr, int N, pair<int, int> *seg_tree)
+{
+    build_tree_helper(arr, 0, 0, N - 1, seg_tree);
+}
+
+void update_tree_helper(int *arr, int i, int s, int e, pair<int, int> *seg_tree, int index, int value)
+{
+    if(s == e)
+    {
+        seg_tree[i].first = value;
+        seg_tree[i].second = -1;
+        arr[index] = value;
+        return;
+    }
+    
+    int mid = (s + e) / 2;
+    if(index <= mid)
+        update_tree_helper(arr, 2 * i + 1, s, mid, seg_tree, index, value);
+    else
+        update_tree_helper(arr, 2 * i + 2, mid + 1, e, seg_tree, index, value);
+    
+    int largest = max(seg_tree[2 * i + 1].first, seg_tree[2 * i + 2].first);
+    int s_largest = max(seg_tree[2 * i + 1].first + seg_tree[2 * i + 2].first - largest, max(seg_tree[2 * i + 1].second, seg_tree[2 * i + 2].second));
+    seg_tree[i].first = largest;
+    seg_tree[i].second = s_largest;
+}
+
+void update_tree(int *arr, int N, pair<int, int> *seg_tree, int index, int value)
+{
+    update_tree_helper(arr, 0, 0, N - 1, seg_tree, index, value);
+}
+
+pair<int, int> query(int *arr, int i, int st, int et, pair<int, int> *seg_tree, int start, int end)
+{
+    if(st == start && et == end)
+        return seg_tree[i];
+    
+    int mid = (st + et) / 2;
+    if(end <= mid)
+        return query(arr, 2 * i + 1, st, mid, seg_tree, start, end);
+    if(start > mid)
+        return query(arr, 2 * i + 2, mid + 1, et, seg_tree, start, end);
+    else
+    {
+        pair<int, int> left_ans = query(arr, 2 * i + 1, st, mid, seg_tree, start, mid);
+        pair<int, int> right_ans = query(arr, 2 * i + 2, mid + 1, et, seg_tree, mid + 1, end);
+        int largest = max(left_ans.first, right_ans.first);
+    	int s_largest = max(left_ans.first + right_ans.first - largest, max(left_ans.second, right_ans.second));
+        pair<int, int> ans;
+        ans.first = largest;
+        ans.second = s_largest;
+        return ans;
+    }
+}
+
+pair<int, int> query(int *arr, int N, pair<int, int> *seg_tree, int start, int end)
+{
+    return query(arr, 0, 0, N - 1, seg_tree, start, end);
+}
+
+int main(int argc, char **argv) 
+{
+    ios_base :: sync_with_stdio(false);
+    cin.tie(NULL);
+    
+    int N;
+    cin >> N;
+    
+    int *arr = new int[N];
+    for(int i = 0; i < N; i++)
+        cin >> arr[i];
+    
+    pair<int, int> *seg_tree = new pair<int, int>[4 * N];
+    build_tree(arr, N, seg_tree);
+    
+    int Q;
+    cin >> Q;
+    
+    for(int i = 0; i < Q; i++)
+    {
+        char c;
+        int a, b;
+        cin >> c >> a >> b;
+        
+        if(c == 'Q')
+        {
+            pair<int, int> p = query(arr, N, seg_tree, a - 1, b - 1);
+            cout << p.first + p.second << "\n";
+        }
+        else
+            update_tree(arr, N, seg_tree, a - 1, b);     
+    }
+    
+    delete []arr;
+    delete []seg_tree;
+}
