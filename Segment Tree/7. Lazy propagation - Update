@@ -1,0 +1,101 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void update_tree_helper(int *segTree, int *lazyTree, int i, int st, int et, int start, int end, int value)
+{
+    // Base Case
+    if(st > et)
+        return;
+    
+    // Lazy tree propagation
+    if(lazyTree[i] != 0)
+    {
+        segTree[i] += lazyTree[i];
+        if(st != et)
+        {
+            lazyTree[2 * i + 1] += lazyTree[i];
+            lazyTree[2 * i + 2] += lazyTree[i];
+        }
+        lazyTree[i] = 0;
+    }
+    
+    // No overlap
+    if(et < start || st > end)
+        return;
+        
+    // Complete overlap
+    if(st >= start && et <= end)
+    {
+        segTree[i] += value;
+        if(st != et)
+        {
+            lazyTree[2 * i + 1] += value;
+            lazyTree[2 * i + 2] += value;
+        }
+        return;
+    }
+    
+    // Partial overlap
+    int mid = (st + et) / 2;
+    update_tree_helper(segTree, lazyTree, 2 * i + 1, st, mid, start, end, value);
+    update_tree_helper(segTree, lazyTree, 2 * i + 2, mid + 1, et, start, end, value);
+    
+    segTree[i] = min(segTree[2 * i + 1], segTree[2 * i + 2]);
+}
+
+void update_tree(int * segTree, int *lazyTree, int N, int start, int end, int value)
+{
+    update_tree_helper(segTree, lazyTree, 0, 0, N - 1, start, end, value);
+}
+
+void build_tree_helper(int *arr, int *segTree, int i, int s, int e)
+{
+    // Base Case
+    if(s == e)
+    {
+        segTree[i] = arr[s];
+        return;
+    }
+    
+    // Recursive call
+    int mid = (s + e) / 2;
+    build_tree_helper(arr, segTree, 2 * i + 1, s, mid);
+    build_tree_helper(arr, segTree, 2 * i + 2, mid + 1, e);
+    segTree[i] = min(segTree[2 * i + 1], segTree[2 * i + 2]);
+}
+
+void build_tree(int *arr, int *segTree, int N)
+{
+    build_tree_helper(arr, segTree, 0, 0, N - 1);
+}
+
+int main(int argc, char **argv)
+{
+    ios_base :: sync_with_stdio(false);
+    cin.tie(NULL);
+    
+    // Taking the sample array
+    int arr[] = {1, 3, -2, 4};
+    int N = sizeof(arr)/sizeof(int);
+    
+    // Declaring the segment tree and lazy tree
+    int *segTree = new int[4 * N]();
+    int *lazyTree = new int[4 * N]();
+    
+    // Building the segment tree
+    build_tree(arr, segTree, N);
+    
+    
+    for(int i = 0; i < 4 * N; i++)
+        cout << segTree[i] << " ";
+    cout << endl;
+    
+    // Updating the value
+    update_tree(segTree, lazyTree, N, 0, 1, 3);
+    
+    
+    for(int i = 0; i < 4 * N; i++)
+        cout << segTree[i] << " ";
+    cout << endl;
+    
+}
